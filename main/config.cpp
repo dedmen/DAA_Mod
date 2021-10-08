@@ -6,10 +6,6 @@ class CfgPatches
         weapons[] = {};
         requiredVersion = 2.06;
         requiredAddons[] = {
-            "A3_Data_F_Orange_Loadorder", // really only need one of these, the latest but lazy AF
-            "A3_Data_F_Enoch_Loadorder",
-            "A3_Data_F_Tacops_Loadorder",
-            "A3_Data_F_Oldman_Loadorder",
             "A3_Data_F_AoW_Loadorder",
             "cba_main" // XEH
 			
