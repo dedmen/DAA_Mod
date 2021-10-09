@@ -34,9 +34,19 @@ if (_function == "DNSAdminList") exitWith {
         "daa" callExtension ["get", ["HTTPAdminList", _data]]; // Launch new request via HTTP
     } else {
         uiNamespace setVariable ["DAA_AdminList", _data splitString ","];
+        if (!isNil "DAA_loadingAdminList") then {
+            // also set it on server
+            [_data splitString ",", {uiNamespace setVariable ["DAA_AdminList", _this]}] remoteExec ["call", 2];
+            DAA_loadingAdminList = nil; // only once
+        }
     };
 };
 
 if (_function == "HTTPAdminList") exitWith {
     uiNamespace setVariable ["DAA_AdminList", _data splitString ","];
+    if (!isNil "DAA_loadingAdminList") then {
+        // also set it on server
+        [_data splitString ",", {uiNamespace setVariable ["DAA_AdminList", _this]}] remoteExec ["call", 2];
+        DAA_loadingAdminList = nil; // only once
+    }
 };

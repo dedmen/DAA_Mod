@@ -40,6 +40,7 @@ class CfgFunctions {
 		class Main {
 			file = "z\daa\addons\main";
 			class extensionCallback {};
+			class reloadAdminList {};
 		};
 	};
 

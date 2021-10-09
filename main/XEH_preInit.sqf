@@ -32,3 +32,9 @@ DAA_ChatEH = addMissionEventHandler ["HandleChatMessage", {
 
     true
 }];
+
+
+["refreshAdmin", {
+    remoteExec ["DAA_reloadAdminList", -2];
+    DAA_loadingAdminList = true;
+}, "all"] call CBA_fnc_registerChatCommand;
