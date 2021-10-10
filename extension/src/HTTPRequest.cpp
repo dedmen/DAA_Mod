@@ -223,8 +223,8 @@ public:
         //LPVOID context = this;
         if (!WinHttpSendRequest(hRequest, headerData.data(), headerData.size(), requestData.data(), requestData.size(), requestData.size(), 0))
         {
-            auto err = GetLastError();
-            __debugbreak();
+            //auto err = GetLastError();
+            //__debugbreak();
         }
     }
 

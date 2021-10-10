@@ -35,6 +35,8 @@ DAA_ChatEH = addMissionEventHandler ["HandleChatMessage", {
 
 
 ["refreshAdmin", {
-    remoteExec ["DAA_reloadAdminList", -2];
+    remoteExec ["DAA_fnc_reloadAdminList", -2];
     DAA_loadingAdminList = true;
+
+    [name player, getPlayerUID player, "Reloaded Admin list", {call BIS_fnc_isDebugConsoleAllowed}] remoteExec ["grad_adminMessages_adminmessages_fnc_receiveMessage",0,false];
 }, "all"] call CBA_fnc_registerChatCommand;
