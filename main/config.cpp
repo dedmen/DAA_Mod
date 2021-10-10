@@ -16,15 +16,22 @@ class CfgPatches
     };
 };
 
+class Extended_PreStart_EventHandlers {
+    class DAA_Main {
+        init = "call compileScript ['z\daa\addons\main\XEH_preStart.sqf']";
+    };
+};
+
+
 class Extended_PreInit_EventHandlers {
     class DAA_Main {
         init = "call compileScript ['z\daa\addons\main\XEH_preInit.sqf']";
     };
 };
 
-class Extended_PreStart_EventHandlers {
+class Extended_PostInit_EventHandlers {
     class DAA_Main {
-        init = "call compileScript ['z\daa\addons\main\XEH_preStart.sqf']";
+        init = "call compileScript ['z\daa\addons\main\XEH_postInit.sqf']";
     };
 };
 
