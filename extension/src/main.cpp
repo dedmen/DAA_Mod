@@ -152,7 +152,7 @@ public:
 
 RequestManager GRequestManager;
 
-void RVExtension(char* output, int outputSize, const char* function)
+void __stdcall RVExtension(char* output, int outputSize, const char* function)
 {
     const std::string_view func(function);
 
@@ -185,7 +185,7 @@ std::string_view unquote(std::string_view input)
     return input.substr(1, input.length() - 2); // "\"test\"" -> "test"
 }
 
-int RVExtensionArgs(char* output, int outputSize, const char* function, const char** argv, int argc)
+int __stdcall RVExtensionArgs(char* output, int outputSize, const char* function, const char** argv, int argc)
 {
     const std::string_view func(function);
 
@@ -236,7 +236,7 @@ int RVExtensionArgs(char* output, int outputSize, const char* function, const ch
     return 0;
 }
 
-void RVExtensionVersion(char* output, int outputSize)
+void __stdcall RVExtensionVersion(char* output, int outputSize)
 {
     std::strncpy(output, "DAA Extension v1.0", outputSize - 1);
 }

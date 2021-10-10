@@ -16,11 +16,7 @@ endif()
 message("GENERATOR USED: '${CMAKE_GENERATOR}'")
 message("COMPILER USED: '${CMAKE_CXX_COMPILER_ID}'")
 
-if(USE_64BIT_BUILD)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/release/@daa_mod")
-else()
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/release/@daa_mod")
-endif()
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/release/@daa_mod")
 
 set(CMAKE_CXX_STANDARD 23) # we want c++latest, because MSVC only includes some c++20 features if you set latest
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

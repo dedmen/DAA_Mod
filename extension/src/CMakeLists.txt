@@ -1,7 +1,11 @@
 cmake_minimum_required (VERSION 3.13)
 
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(PLUGIN_NAME "daa_x64")
+elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    set(PLUGIN_NAME "daa")
+endif()
 
-set(PLUGIN_NAME "daa_x64")
 
 add_definitions(/DNOMINMAX)
 add_definitions(/DINTERCEPT_SQF_STRTYPE_RSTRING)
