@@ -4,7 +4,7 @@
 #include <winhttp.h>
 #pragma comment(lib, "Winhttp.lib")
 
-
+#include <format>
 #include "Util.hpp"
 
 
@@ -17,6 +17,7 @@ struct HTTPRequest::InFlightRequest {
 private:
     std::wstring QueryName;
     std::string requestData;
+    std::wstring headerData;
 
     HINTERNET hSession = nullptr;
     HINTERNET hConnect = nullptr;
@@ -159,6 +160,12 @@ public:
         requestData = std::move(data);        
     }
 
+    void AddHeader(std::string_view key, std::string_view value)
+    {
+        //if (!headerData.empty())
+            headerData.append(Util::UTF8ToUTF16(std::format("{}: {}\r\n", key, value)));
+    }
+
     void StartRequest()
     {
         URL_COMPONENTS urlComponents {};
@@ -193,7 +200,16 @@ public:
             return;
         }
 
-        hRequest = WinHttpOpenRequest(hConnect, reqType == RequestType::GET ? L"GET" : L"POST", subURL.empty() ? L"/" : subURL.data(), NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, urlComponents.nScheme == INTERNET_SCHEME_HTTPS ? WINHTTP_FLAG_SECURE : 0);
+        std::wstring_view verb;
+        switch (reqType)
+        {
+        case RequestType::GET: verb = L"GET"; break;
+        case RequestType::POST: verb = L"POST"; break;
+        case RequestType::PUT: verb = L"PUT"; break;
+        }
+
+
+        hRequest = WinHttpOpenRequest(hConnect, verb.data(), subURL.empty() ? L"/" : subURL.data(), NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, urlComponents.nScheme == INTERNET_SCHEME_HTTPS ? WINHTTP_FLAG_SECURE : 0);
 
         if (!hRequest)
         {
@@ -205,7 +221,7 @@ public:
         //WinHttpSetStatusCallback(hRequest, generalCallback, WINHTTP_CALLBACK_FLAG_ALL_COMPLETIONS, 0);
      
         //LPVOID context = this;
-        if (!WinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, requestData.data(), requestData.size(), requestData.size(), 0))
+        if (!WinHttpSendRequest(hRequest, headerData.data(), headerData.size(), requestData.data(), requestData.size(), requestData.size(), 0))
         {
             auto err = GetLastError();
             __debugbreak();
@@ -224,6 +240,9 @@ public:
         if (hConnect) WinHttpCloseHandle(hConnect);
         if (hSession) WinHttpCloseHandle(hSession);
     }
+
+
+    
 };
 
 
@@ -240,6 +259,12 @@ void HTTPRequest::SetPostData(std::string data)
 {
     if (_currentRequest)
         _currentRequest->SetPostData(std::move(data));
+}
+
+void HTTPRequest::AddHeader(std::string_view key, std::string_view value)
+{
+    if (_currentRequest)
+        _currentRequest->AddHeader(key, value);
 }
 
 void HTTPRequest::StartRequest()

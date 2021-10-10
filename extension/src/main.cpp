@@ -189,16 +189,40 @@ int RVExtensionArgs(char* output, int outputSize, const char* function, const ch
 {
     const std::string_view func(function);
 
-    if (func == "post" && argc == 3) // "post", ["handle", "https://url", "postData"]
+    auto makeHTTPRequest = [](HTTPRequest::RequestType type, const char** argv, int argc)
     {
-        auto request = std::make_shared<HTTPRequest>(unquote(argv[1]), HTTPRequest::RequestType::POST);
+        auto request = std::make_shared<HTTPRequest>(unquote(argv[1]), type);
+        request->AddHeader("daa-api-auth-token", "872a1622-58ec-4d3a-91d2-13021fbe5368");
+
+        if (argc >= 4)
+        {
+            auto headers = unquote(argv[3]);
+            for (auto& header : Util::SplitString(headers, ';'))
+            {
+                auto headerSplit = Util::SplitString(header, ':');
+                if (headerSplit.size() == 2)
+                    request->AddHeader(headerSplit[0], headerSplit[1]);
+            }
+        }
+
+        request->AddHeader("Content-Type", "text/plain");
         request->SetPostData(std::string(unquote(argv[2])));
         GRequestManager.PushRequest(request, unquote(argv[0]));
         request->StartRequest();
+    };
+
+    if (func == "post" && argc == 3) // "post", ["handle", "https://url", "postData", "header:value;header2:value2"]
+    {
+        makeHTTPRequest(HTTPRequest::RequestType::POST, argv, argc);
+    }
+    else if (func == "put" && argc >= 3) // "put", ["handle", "https://url", "postData", "header:value;header2:value2"]
+    {
+        makeHTTPRequest(HTTPRequest::RequestType::PUT, argv, argc);
     }
     else if (func == "get" && argc == 2) // "get", ["handle", "https://url"]
     {
         auto request = std::make_shared<HTTPRequest>(unquote(argv[1]), HTTPRequest::RequestType::GET);
+        request->AddHeader("daa-api-auth-token", "872a1622-58ec-4d3a-91d2-13021fbe5368");
         GRequestManager.PushRequest(request, unquote(argv[0]));
         request->StartRequest();
     }

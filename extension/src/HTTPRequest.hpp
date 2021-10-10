@@ -14,13 +14,16 @@ public:
     enum class RequestType
     {
         GET,
-        POST
+        POST,
+        PUT
     };
 
     HTTPRequest(std::string_view URL, RequestType type);
     ~HTTPRequest();
 
     void SetPostData(std::string data);
+
+    void AddHeader(std::string_view key, std::string_view value);
 
     void StartRequest();
 

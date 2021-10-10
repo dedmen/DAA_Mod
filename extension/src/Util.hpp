@@ -1,11 +1,35 @@
 #pragma once
 #include <string_view>
+#include <vector>
 
 namespace Util {
     // Convert a wide Unicode string to an UTF8 string
     std::string UTF16ToUTF8(std::wstring_view wstr);
     // Convert an UTF8 string to a wide Unicode String
     std::wstring UTF8ToUTF16(std::string_view str);
+
+
+    inline std::vector<std::string_view> SplitString(std::string_view s, char delim) {
+        std::vector<std::string_view> elems;
+        std::string::size_type lastPos = 0;
+        const std::string::size_type length = s.length();
+
+        while (lastPos < length + 1) {
+            std::string::size_type pos = s.find_first_of(delim, lastPos);
+            if (pos == std::string::npos) {
+                pos = length;
+            }
+
+            //if (pos != lastPos || !trimEmpty)
+            elems.emplace_back(s.data() + lastPos, pos - lastPos);
+
+            lastPos = pos + 1;
+        }
+
+        return elems;
+    }
+
+
 }
 
 #include <vector>
