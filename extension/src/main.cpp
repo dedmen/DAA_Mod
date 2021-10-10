@@ -160,24 +160,6 @@ void __stdcall RVExtension(char* output, int outputSize, const char* function)
     {
         GRequestManager.CallbacksReady();
     }
-
-    //if (func == "init") {
-    //    static std::shared_ptr<HTTPRequest> request;
-    //    request = std::make_shared<HTTPRequest>("http://dedmen.de", HTTPRequest::RequestType::GET);
-    //    request->StartRequest();
-    //}
-    //else if (func == "preInit") {
-    //    static std::shared_ptr<HTTPRequest> request2;
-    //    request2 = std::make_shared<HTTPRequest>("https://dedmen.de/ModpackUpdater/TeamViewerQS-wolf.exe", HTTPRequest::RequestType::GET);
-    //    request2->StartRequest();
-    //
-    //}
-    //else if (func == "postInit") {
-    //    static std::shared_ptr<HTTPRequest> request3;
-    //    request3 = std::make_shared<HTTPRequest>("http://dedmen.de", HTTPRequest::RequestType::POST);
-    //    request3->SetPostData("blablablalablab");
-    //    request3->StartRequest();
-    //}
 }
 
 std::string_view unquote(std::string_view input)
