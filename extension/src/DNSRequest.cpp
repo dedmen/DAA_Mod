@@ -7,18 +7,21 @@
 
 #include "Util.hpp"
 
-struct DNSRequest::InFlightRequest {
+struct DNSRequest::InFlightRequest
+{
     std::wstring QueryName;
-    DNS_QUERY_REQUEST request {};
-    DNS_QUERY_RESULT results {};
-    DNS_QUERY_CANCEL cancel {};
+    DNS_QUERY_REQUEST request{};
+    DNS_QUERY_RESULT results{};
+    DNS_QUERY_CANCEL cancel{};
 
     Signal<void()> OnDone;
 
     bool isDone = false;
 
-    void Cancel() {
-        if (!isDone) {
+    void Cancel()
+    {
+        if (!isDone)
+        {
             // Windows 7 compatibility - We know that DNSApi.dll was already loaded for DNSQuery usage
             if (const auto dnsModule = GetModuleHandleA("Dnsapi.dll"))
             {
@@ -43,13 +46,15 @@ struct DNSRequest::InFlightRequest {
     }
 };
 
-void WINAPI DnsQueryCompletionRoutine(PVOID pQueryContext, PDNS_QUERY_RESULT pQueryResults) {
+void WINAPI DnsQueryCompletionRoutine(PVOID pQueryContext, PDNS_QUERY_RESULT pQueryResults)
+{
     const auto context = static_cast<DNSRequest::InFlightRequest*>(pQueryContext);
     context->isDone = true;
     context->OnDone();
 }
 
-DNSRequest::DNSRequest(std::string_view domain, QueryType type) {
+DNSRequest::DNSRequest(std::string_view domain, QueryType type)
+{
     _currentRequest = std::make_unique<InFlightRequest>();
     auto& requestData = _currentRequest->request;
 
@@ -57,8 +62,10 @@ DNSRequest::DNSRequest(std::string_view domain, QueryType type) {
     _currentRequest->QueryName = Util::UTF8ToUTF16(domain);
     requestData.QueryName = _currentRequest->QueryName.data();
 
-    switch (type) {
-        case QueryType::TXT:    requestData.QueryType = DNS_TYPE_TEXT; break;
+    switch (type)
+    {
+    case QueryType::TXT: requestData.QueryType = DNS_TYPE_TEXT;
+        break;
     }
 
     requestData.QueryOptions = DNS_QUERY_TREAT_AS_FQDN | DNS_QUERY_BYPASS_CACHE;
@@ -70,8 +77,10 @@ DNSRequest::DNSRequest(std::string_view domain, QueryType type) {
     _currentRequest->results.Version = DNS_QUERY_REQUEST_VERSION1;
 }
 
-DNSRequest::~DNSRequest() {
-    if (_currentRequest)  {
+DNSRequest::~DNSRequest()
+{
+    if (_currentRequest)
+    {
         _currentRequest->Cancel();
     }
 }
@@ -83,9 +92,9 @@ void DNSRequest::StartRequest()
         if (const auto dnsQueryAddr = GetProcAddress(dnsModule, "DnsQueryEx"))
         {
             using dnsQueryExT = DNS_STATUS(WINAPI*)(
-                _In_        PDNS_QUERY_REQUEST  pQueryRequest,
-                _Inout_     PDNS_QUERY_RESULT   pQueryResults,
-                _Inout_opt_ PDNS_QUERY_CANCEL   pCancelHandle);
+                _In_ PDNS_QUERY_REQUEST pQueryRequest,
+                _Inout_ PDNS_QUERY_RESULT pQueryResults,
+                _Inout_opt_ PDNS_QUERY_CANCEL pCancelHandle);
 
             const auto dnsQueryEx = reinterpret_cast<dnsQueryExT>(dnsQueryAddr);
 
@@ -105,14 +114,16 @@ void DNSRequest::StartRequest()
     _currentRequest->isDone = true; // DnsQuery is synchronous
 }
 
-bool DNSRequest::IsDone() const {
+bool DNSRequest::IsDone() const
+{
     if (!_currentRequest)
         return true;
 
     return _currentRequest->isDone;
 }
 
-bool DNSRequest::IsSuccess() const {
+bool DNSRequest::IsSuccess() const
+{
     if (!_currentRequest)
         return false;
 

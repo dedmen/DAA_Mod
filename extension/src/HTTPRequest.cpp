@@ -8,7 +8,8 @@
 #include "Util.hpp"
 
 
-struct HTTPRequest::InFlightRequest {
+struct HTTPRequest::InFlightRequest
+{
     bool isDone = false;
     uint16_t errorCode = 0;
     std::string result;
@@ -23,7 +24,7 @@ private:
     HINTERNET hConnect = nullptr;
     HINTERNET hRequest = nullptr;
 
-    HTTPRequest::RequestType reqType;
+    RequestType reqType;
     std::wstring requestURL;
 
     std::wstring domain;
@@ -45,7 +46,7 @@ private:
 
     static void CALLBACK generalCallback(HINTERNET hInternet, DWORD_PTR dwContext, DWORD dwInternetStatus, LPVOID lpvStatusInformation, DWORD dwStatusInformationLength)
     {
-        InFlightRequest* myself = reinterpret_cast<InFlightRequest*>(dwContext);
+        auto myself = reinterpret_cast<InFlightRequest*>(dwContext);
 
         if (dwInternetStatus == WINHTTP_CALLBACK_STATUS_SENDREQUEST_COMPLETE) // first
         {
@@ -57,7 +58,7 @@ private:
 
             if (myself->requestData.empty()) // no data to send anymore, wait for response
             {
-                ::WinHttpReceiveResponse(hInternet, 0);
+                WinHttpReceiveResponse(hInternet, nullptr);
                 return;
             }
 
@@ -77,7 +78,7 @@ private:
 
             if (myself->requestData.empty()) // no data to send anymore, wait for response
             {
-                ::WinHttpReceiveResponse(hInternet, 0);
+                WinHttpReceiveResponse(hInternet, nullptr);
                 return;
             }
 
@@ -91,12 +92,12 @@ private:
             DWORD statusCode = 0;
             DWORD statusCodeSize = sizeof(DWORD);
 
-            ::WinHttpQueryHeaders(hInternet,
-                WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
-                WINHTTP_HEADER_NAME_BY_INDEX,
-                &statusCode,
-                &statusCodeSize,
-                WINHTTP_NO_HEADER_INDEX);
+            WinHttpQueryHeaders(hInternet,
+                                WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
+                                WINHTTP_HEADER_NAME_BY_INDEX,
+                                &statusCode,
+                                &statusCodeSize,
+                                WINHTTP_NO_HEADER_INDEX);
 
             myself->errorCode = statusCode;
 
@@ -132,7 +133,7 @@ private:
 
         if (dwInternetStatus == WINHTTP_CALLBACK_STATUS_REQUEST_ERROR)
         {
-            auto res = (WINHTTP_ASYNC_RESULT*)lpvStatusInformation;
+            auto res = static_cast<WINHTTP_ASYNC_RESULT*>(lpvStatusInformation);
 
             if (res->dwResult == ERROR_WINHTTP_OPERATION_CANCELLED)
                 return; // out InFlightReques might already be deallocated
@@ -140,11 +141,9 @@ private:
             //__debugbreak();
         }
         //__debugbreak();
-
     }
 
 public:
-
     InFlightRequest(std::string_view url, RequestType type): reqType(type), requestURL(Util::UTF8ToUTF16(url))
     {
         // Use WinHttpOpen to obtain a session handle.
@@ -157,18 +156,18 @@ public:
 
     void SetPostData(std::string data)
     {
-        requestData = std::move(data);        
+        requestData = std::move(data);
     }
 
     void AddHeader(std::string_view key, std::string_view value)
     {
         //if (!headerData.empty())
-            headerData.append(Util::UTF8ToUTF16(std::format("{}: {}\r\n", key, value)));
+        headerData.append(Util::UTF8ToUTF16(std::format("{}: {}\r\n", key, value)));
     }
 
     void StartRequest()
     {
-        URL_COMPONENTS urlComponents {};
+        URL_COMPONENTS urlComponents{};
         urlComponents.dwStructSize = sizeof(URL_COMPONENTS);
 
         domain.resize(256);
@@ -203,13 +202,16 @@ public:
         std::wstring_view verb;
         switch (reqType)
         {
-        case RequestType::GET: verb = L"GET"; break;
-        case RequestType::POST: verb = L"POST"; break;
-        case RequestType::PUT: verb = L"PUT"; break;
+        case RequestType::GET: verb = L"GET";
+            break;
+        case RequestType::POST: verb = L"POST";
+            break;
+        case RequestType::PUT: verb = L"PUT";
+            break;
         }
 
 
-        hRequest = WinHttpOpenRequest(hConnect, verb.data(), subURL.empty() ? L"/" : subURL.data(), NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, urlComponents.nScheme == INTERNET_SCHEME_HTTPS ? WINHTTP_FLAG_SECURE : 0);
+        hRequest = WinHttpOpenRequest(hConnect, verb.data(), subURL.empty() ? L"/" : subURL.data(), nullptr,  WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, urlComponents.nScheme == INTERNET_SCHEME_HTTPS ? WINHTTP_FLAG_SECURE : 0);
 
         if (!hRequest)
         {
@@ -217,9 +219,9 @@ public:
             SetDone();
             return;
         }
-        
+
         //WinHttpSetStatusCallback(hRequest, generalCallback, WINHTTP_CALLBACK_FLAG_ALL_COMPLETIONS, 0);
-     
+
         //LPVOID context = this;
         if (!WinHttpSendRequest(hRequest, headerData.data(), headerData.size(), requestData.data(), requestData.size(), requestData.size(), 0))
         {
@@ -231,7 +233,7 @@ public:
     void WaitForDone()
     {
         if (hSession && hConnect && hRequest)
-            WinHttpReceiveResponse(hRequest, NULL);
+            WinHttpReceiveResponse(hRequest, nullptr);
     }
 
     ~InFlightRequest()
@@ -240,12 +242,7 @@ public:
         if (hConnect) WinHttpCloseHandle(hConnect);
         if (hSession) WinHttpCloseHandle(hSession);
     }
-
-
-    
 };
-
-
 
 
 HTTPRequest::HTTPRequest(std::string_view URL, RequestType type)
