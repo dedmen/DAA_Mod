@@ -8,8 +8,6 @@ class CfgPatches
         requiredAddons[] = {
             "A3_Data_F_AoW_Loadorder",
             "rhs_main_loadorder",
-            "rhsgref_main_loadorder",
-            "rhssaf_main_loadorder",
             "rhsusf_main_loadorder"
         };
         version = 1.0;
