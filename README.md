@@ -29,24 +29,24 @@ addMissionEventHandler ["ExtensionCallback", {
 There are currently 4 types of requests imlemented
 
 - HTTP GET
-```
+```sqf
 // "daa" callExtension ["get", [Handle, URL]];
 "daa" callExtension ["get", ["JsonTest", "http://headers.jsontest.com"]];
 ```
 - HTTP POST
-```
+```sqf
 // "daa" callExtension ["post", [Handle, URL, PostData(, Headers)]];
 "daa" callExtension ["post", ["JsonTest", "https://webhook.site/1234", '{"JsonData": true}', "content-type:application/json"]];
 "daa" callExtension ["post", ["JsonTest", "https://webhook.site/1234", '{"JsonData": false}', "content-type:application/json;SomeCustomHeader:SomeValue"]];
 ```
 - HTTP PUT
-```
+```sqf
 // "daa" callExtension ["put", [Handle, URL, PostData(, Headers)]];
 "daa" callExtension ["put", ["JsonTest", "https://webhook.site/1234", '{"JsonData": true}', "content-type:application/json"]];
 "daa" callExtension ["put", ["JsonTest", "https://webhook.site/1234", '{"JsonData": false}', "content-type:application/json;SomeCustomHeader:SomeValue"]];
 ```
 - DNS TXT record lookup
-```
+```sqf
 // "daa" callExtension ["dns", [Handle, Domain]];
 "daa" callExtension ["dns", ["JsonTest", "1234.dnshook.site"]];
 ```
@@ -54,13 +54,13 @@ There are currently 4 types of requests imlemented
 Plus some utility commands
 
 - Add global HTTP header to every future request
-```
+```sqf
 // "daa" callExtension ["addGlobalHeader", [Headers]];
 "daa" callExtension ["addGlobalHeader", ["SomeCustomHeader:SomeValue;SomeOtherHeader:SomeOtherValue"]];
 ```
 
 - Remove ALL global HTTP headers
-```
+```sqf
 // "daa" callExtension ["clearGlobalHeaders", []];
 "daa" callExtension ["clearGlobalHeaders", []];
 ```
