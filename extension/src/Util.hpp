@@ -62,6 +62,49 @@ namespace Util
                     return std::pair<std::string_view, std::string_view>(headerSplit[0], headerSplit[1]);
                 });
     }
+
+    // https://github.com/arma3/sqf-value/blob/master/sqf-value/value.hpp#L306
+    static std::string ParseSQFString(std::string_view data)
+    {
+        auto begin = data.begin();
+        auto end = data.end();
+        // start-char
+        char c = *begin;
+
+        // find end
+        std::string_view::const_iterator copy;
+        size_t quotes = 0;
+        for (copy = begin + 1; copy != end; ++copy)
+        {
+            if (*copy == c)
+            {
+                ++copy;
+                if (copy != end && *copy == c)
+                    quotes++;
+                else
+                    break;
+            }
+        }
+        // create string
+        auto len = copy - begin - 2;
+        std::string target;
+        target.reserve(len - quotes);
+        for (++begin; begin != end; ++begin)
+        {
+            char cur = *begin;
+            if (*begin == c)
+            {
+                ++begin;
+                if (begin != end && *begin == c)
+                    target.append(&cur, &cur + 1);
+                else
+                    break;
+            }
+            else
+                target.append(&cur, &cur + 1);
+        }
+        return target;
+    }
 }
 
 

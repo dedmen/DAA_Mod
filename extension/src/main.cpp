@@ -69,7 +69,7 @@ void MakeHTTPRequest(HTTPRequest::RequestType type, const char** argv, unsigned 
     {
         if (!hasContentType)
             request->AddHeader("Content-Type", "text/plain");
-        request->SetPostData(std::string(Util::UnQuote(argv[PostDataIndex])));
+        request->SetPostData(Util::ParseSQFString(argv[PostDataIndex]));
     }
 
     GRequestManager.PushRequest(request, Util::UnQuote(argv[0]));
