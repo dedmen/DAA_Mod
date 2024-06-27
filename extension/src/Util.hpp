@@ -1,6 +1,10 @@
 #pragma once
+#include <bit>
 #include <string_view>
 #include <vector>
+#include <functional>
+#include <cctype>
+#include <ranges>
 
 namespace Util
 {
@@ -32,10 +36,35 @@ namespace Util
 
         return elems;
     }
+
+    inline std::string_view UnQuote(std::string_view input)
+    {
+        return input.substr(1, input.length() - 2); // "\"test\"" -> "test"
+    }
+
+    inline auto SplitHeaderString(std::string_view headers)
+    {
+        // Split by ;
+        // Split each by :
+        // Filter out pairs, everything thats not a pair is invalid either too many or too few elements
+        return
+            Util::SplitString(Util::UnQuote(headers), ';')
+            | std::views::transform([](const auto& header)
+                {
+                    return Util::SplitString(header, ':');
+                })
+            | std::views::filter([](const auto& headerSplit)
+                {
+                    return headerSplit.size() == 2;
+                })
+            | std::views::transform([](const auto& headerSplit)
+                {
+                    return std::pair<std::string_view, std::string_view>(headerSplit[0], headerSplit[1]);
+                });
+    }
 }
 
-#include <vector>
-#include <functional>
+
 
 template <class Sig>
 class Signal;
@@ -95,3 +124,85 @@ public:
 private:
     std::vector<Slot> slots{};
 };
+
+
+
+class FnvHash
+{
+    static constexpr uint64_t FNV_PRIME = 0x100000001b3;
+    static constexpr uint64_t OFFSET_BASIS = 0xcbf29ce484222325;
+
+    uint64_t hashValue = FNV_PRIME;
+public:
+    constexpr FnvHash() {}
+
+    template <unsigned int N>
+    constexpr FnvHash(const char(&str)[N]) { AddString(std::string_view(str, N)); }
+
+    constexpr operator uint64_t() const { return hashValue; }
+    constexpr uint64_t GetValue() const { return hashValue; }
+    consteval uint64_t GetValueCompiletime() const { return hashValue; }
+
+    constexpr FnvHash& AddString(std::string_view str)
+    {
+        for (const auto value : str)
+        {
+            hashValue = hashValue ^ value;
+            hashValue *= FNV_PRIME;
+        }
+
+        return *this;
+    }
+
+    constexpr FnvHash& AddString(std::wstring_view str)
+    {
+        for (const auto value : str)
+        {
+            hashValue = hashValue ^ value;
+            hashValue *= FNV_PRIME;
+        }
+
+        return *this;
+    }
+
+    FnvHash& AddStringCI(std::string_view str)
+    {
+        for (const auto value : str)
+        {
+            hashValue = hashValue ^ std::tolower(value);
+            hashValue *= FNV_PRIME;
+        }
+    
+        return *this;
+    }
+    
+    //FnvHash& AddStringCI(std::wstring_view str)
+    //{
+    //    for (const auto value : str)
+    //    {
+    //        hashValue = hashValue ^ std::towlower(value);
+    //        hashValue *= FNV_PRIME;
+    //    }
+    //
+    //    return *this;
+    //}
+
+    template<std::integral T>
+    constexpr FnvHash& Add(T d)
+    {
+        auto asArray = std::bit_cast<std::array<uint8_t, sizeof(T)>>(d);
+
+        for (const auto value : asArray)
+        {
+            hashValue = hashValue ^ value;
+            hashValue *= FNV_PRIME;
+        }
+
+        return *this;
+    }
+};
+
+consteval uint64_t operator""_fnvHash(const char* str, std::size_t len)
+{
+    return FnvHash{}.AddString(std::string_view(str, len)).GetValueCompiletime();
+}
