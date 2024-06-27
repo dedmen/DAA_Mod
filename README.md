@@ -30,8 +30,9 @@ There are currently 4 types of requests imlemented
 
 - HTTP GET
 ```sqf
-// "daa" callExtension ["get", [Handle, URL]];
+// "daa" callExtension ["get", [Handle, URL(, Headers)]];
 "daa" callExtension ["get", ["JsonTest", "http://headers.jsontest.com"]];
+"daa" callExtension ["get", ["JsonTest", "http://headers.jsontest.com", "SomeCustomHeader:SomeValue"]];
 ```
 - HTTP POST
 ```sqf
